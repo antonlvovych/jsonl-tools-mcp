@@ -18,7 +18,56 @@ bun run build
 
 # Start the MCP server
 bun run start
+
+# Run tests
+bun run test
+
+# Run tests with file watching
+bun run test:watch
+
+# Generate test coverage report
+bun run test:coverage
 ```
+
+## Testing Infrastructure
+
+This project includes comprehensive Jest testing with **69 tests** providing excellent coverage of business logic:
+
+### Test Framework
+- **Jest** with TypeScript and ES modules support
+- **Comprehensive mocking** of fs/promises and MCP SDK
+- **Real file I/O testing** with temporary files
+- **Coverage reporting** with detailed analysis
+
+### Test Organization
+- `config.test.ts`: Configuration validation and DEFAULT_CONFIG testing
+- `index.test.ts`: Core utilities, mocking patterns, and server infrastructure  
+- `server-unit.test.ts`: Isolated business logic testing (25 comprehensive tests)
+- `server-integration.test.ts`: File processing with real JSONL data (12 tests)
+
+### Key Testing Patterns
+- **Business logic isolation**: Tests focus on algorithms rather than MCP integration
+- **Temporary file management**: Integration tests create/cleanup real files
+- **Comprehensive error handling**: Invalid JSON, file errors, edge cases
+- **Schema detection validation**: Heuristics for field type identification
+- **Pattern analysis verification**: Grouping, correlation, timeline generation
+
+## Model Context Protocol (MCP) Integration
+
+This project implements an **MCP server** using the `@modelcontextprotocol/sdk` package:
+
+### MCP SDK Components Used
+- **Server**: Core MCP server framework for handling protocol communication
+- **StdioServerTransport**: Communication layer using stdin/stdout 
+- **Request Schemas**: TypeScript types for `ListToolsRequestSchema` and `CallToolRequestSchema`
+- **Error Handling**: `McpError` and `ErrorCode` for standardized error responses
+
+### MCP Tool Registration
+The server registers 9 tools that AI assistants can invoke:
+1. **Configuration tools**: `get_config`, `set_config`, `detect_schema`, `list_log_files`
+2. **Analysis tools**: `parse_jsonl`, `search_logs`, `filter_logs`, `find_related_logs`, `analyze_log_patterns`
+
+Each tool has a defined JSON schema for input validation and structured responses for AI consumption.
 
 ## Architecture Overview
 
@@ -84,3 +133,68 @@ Each tool follows the pattern:
 - **Memory efficiency**: Large files processed line-by-line, never loaded entirely into memory
 - **Type safety**: TypeScript interfaces ensure config structure and tool argument validation
 - **Extensibility**: New log formats supported by updating schema configuration, no code changes needed
+
+## Tool Usage Examples
+
+When working with this MCP server, follow these common patterns:
+
+### Initial Setup Workflow
+```typescript
+// 1. Check current configuration
+get_config()
+
+// 2. Set log directory  
+set_config({
+  config: { logDirectory: "/path/to/logs" }
+})
+
+// 3. Auto-detect schema from sample
+detect_schema({
+  file_path: "sample.jsonl",
+  sample_size: 100
+})
+
+// 4. Apply detected or custom schema
+set_config({
+  config: {
+    schema: {
+      timestampField: "timestamp",
+      levelField: "level",
+      correlationFields: ["migrationId", "taskId"]
+    }
+  }
+})
+```
+
+### Common Analysis Patterns
+```typescript
+// Start with overview
+list_log_files({ pattern: "*.jsonl" })
+analyze_log_patterns({
+  file_path: "app.jsonl",
+  group_by: "level",
+  include_timeline: true
+})
+
+// Focus on specific issues
+filter_logs({
+  file_path: "app.jsonl", 
+  level: "error",
+  time_from: "2025-06-16T05:00:00Z"
+})
+
+// Find related context
+find_related_logs({
+  file_path: "app.jsonl",
+  correlation_id: "session-123",
+  context_window: 5
+})
+```
+
+### Log Processing Best Practices
+- **Always configure schema first** for optimal field mapping
+- **Use semantic field names** ("level", "message") rather than raw field names
+- **Start with pattern analysis** to understand log structure
+- **Use correlation fields** to track related events across logs
+- **Leverage time windows** when finding related logs
+- **Configure display options** for readable output formatting

@@ -222,6 +222,302 @@ bun run build
 
 # Start the server
 bun run start
+
+# Run tests
+bun run test
+
+# Run tests with file watching
+bun run test:watch
+
+# Run tests with coverage report
+bun run test:coverage
+```
+
+## Testing
+
+This project includes a comprehensive test suite with **69 tests** covering all core functionality:
+
+### Test Coverage
+- **Configuration management**: Schema validation, field mapping, defaults
+- **JSONL processing**: Parsing, search, filter, correlation detection
+- **Schema detection**: Automatic field type identification using heuristics
+- **Pattern analysis**: Log grouping, timeline generation, error analysis
+- **File operations**: Path resolution, nested field access, error handling
+- **Integration tests**: Real file I/O with temporary test data
+
+### Test Structure
+- `src/__tests__/config.test.ts` - Configuration and schema validation (11 tests)
+- `src/__tests__/index.test.ts` - Core server utilities and mocking (21 tests)  
+- `src/__tests__/server-unit.test.ts` - Business logic unit tests (25 tests)
+- `src/__tests__/server-integration.test.ts` - File I/O integration tests (12 tests)
+
+### Running Tests
+```bash
+# Run all tests
+bun run test
+
+# Watch mode for development
+bun run test:watch
+
+# Generate coverage report
+bun run test:coverage
+```
+
+All tests use Jest with TypeScript and ES modules support. The test suite includes comprehensive mocking of file system operations and focuses on business logic validation.
+
+## Usage Examples
+
+### Basic Setup and Configuration
+
+```typescript
+// 1. Start with configuration
+get_config()
+// Returns current configuration settings
+
+// 2. Set your log directory
+set_config({
+  config: {
+    logDirectory: "/path/to/your/logs"
+  }
+})
+
+// 3. Auto-detect schema from your logs
+detect_schema({
+  file_path: "migration.jsonl",
+  sample_size: 100
+})
+// Analyzes 100 log entries and suggests field mappings
+
+// 4. Apply detected schema
+set_config({
+  config: {
+    schema: {
+      timestampField: "timestamp",
+      levelField: "level", 
+      messageField: "message",
+      correlationFields: ["migrationId", "taskId", "listId"],
+      apiResponseFields: ["response", "data"],
+      errorFields: ["error", "errorMessage"]
+    }
+  }
+})
+```
+
+### Working with Log Files
+
+```typescript
+// List available log files
+list_log_files({ pattern: "*.jsonl" })
+// Returns: ["migration.jsonl", "api-calls.jsonl", "errors.jsonl"]
+
+// Parse and read logs with formatting
+parse_jsonl({
+  file_path: "migration.jsonl",
+  limit: 50,
+  offset: 0
+})
+// Returns structured logs with line numbers and formatting
+```
+
+### Searching and Filtering
+
+```typescript
+// Search for specific terms
+search_logs({
+  file_path: "migration.jsonl",
+  search_term: "migration-1750050885613",
+  field: "message",
+  case_sensitive: false,
+  limit: 20
+})
+
+// Search across all fields for correlation IDs
+search_logs({
+  file_path: "migration.jsonl", 
+  search_term: "901502943040"  // Will find in taskId, listId, etc.
+})
+
+// Filter by log level
+filter_logs({
+  file_path: "migration.jsonl",
+  level: "error",
+  limit: 100
+})
+
+// Filter by time range
+filter_logs({
+  file_path: "migration.jsonl",
+  time_from: "2025-06-16T05:00:00Z",
+  time_to: "2025-06-16T06:00:00Z",
+  event: "api_response"
+})
+
+// Custom filtering
+filter_logs({
+  file_path: "migration.jsonl",
+  custom_filter: { 
+    client: "ClickUp",
+    status: "success" 
+  }
+})
+```
+
+### Finding Related Logs
+
+```typescript
+// Find all logs related to a migration
+find_related_logs({
+  file_path: "migration.jsonl",
+  correlation_id: "migration-1750050885613",
+  context_window: 5,      // Include 5 logs before/after each match
+  time_window_minutes: 10 // Include logs within 10 minutes
+})
+
+// Find logs related to a specific task
+find_related_logs({
+  file_path: "migration.jsonl",
+  correlation_id: "task-456789",
+  context_window: 3
+})
+```
+
+### Pattern Analysis
+
+```typescript
+// Analyze patterns by event type
+analyze_log_patterns({
+  file_path: "migration.jsonl",
+  group_by: "event",
+  include_timeline: true
+})
+// Returns: { "api_request": 150, "api_response": 148, "error": 12 }
+
+// Analyze by log level with timeline
+analyze_log_patterns({
+  file_path: "migration.jsonl", 
+  group_by: "level",
+  include_timeline: true,
+  analyze_errors: true
+})
+
+// Analyze API client patterns
+analyze_log_patterns({
+  file_path: "api-calls.jsonl",
+  group_by: "client",
+  include_timeline: false
+})
+```
+
+### Real-World ClickUp Migration Example
+
+```typescript
+// 1. Setup for ClickUp migration logs
+set_config({
+  config: {
+    logDirectory: "./clickup-migration-logs",
+    schema: {
+      timestampField: "timestamp",
+      levelField: "level",
+      messageField: "message",
+      eventField: "event", 
+      correlationFields: [
+        "migrationId", "taskId", "listId", "spaceId", 
+        "folderId", "userId", "workspaceId"
+      ],
+      apiResponseFields: ["response", "data", "result"],
+      errorFields: ["error", "errorMessage", "stackTrace"]
+    },
+    display: {
+      prettyPrintApiResponses: true,
+      showLineNumbers: true,
+      maxFieldValueLength: 500
+    }
+  }
+})
+
+// 2. Find all logs for a failed migration
+find_related_logs({
+  file_path: "migration-errors.jsonl",
+  correlation_id: "migration-1750050885613"
+})
+
+// 3. Analyze what went wrong
+filter_logs({
+  file_path: "migration-errors.jsonl",
+  level: "error",
+  custom_filter: { migrationId: "migration-1750050885613" }
+})
+
+// 4. Check API response patterns for rate limiting
+analyze_log_patterns({
+  file_path: "api-responses.jsonl",
+  group_by: "response.status",
+  analyze_errors: true
+})
+
+// 5. Find timeline of events for a specific task
+search_logs({
+  file_path: "task-processing.jsonl",
+  search_term: "task-901502943040"
+})
+```
+
+### Debugging Workflow Example
+
+```typescript
+// 1. Start with high-level analysis
+analyze_log_patterns({
+  file_path: "application.jsonl",
+  group_by: "level",
+  include_timeline: true
+})
+
+// 2. Focus on errors
+filter_logs({
+  file_path: "application.jsonl", 
+  level: "error",
+  time_from: "2025-06-16T05:00:00Z"
+})
+
+// 3. Find related logs for specific error
+find_related_logs({
+  file_path: "application.jsonl",
+  correlation_id: "session-abc123",
+  context_window: 10
+})
+
+// 4. Search for similar error patterns
+search_logs({
+  file_path: "application.jsonl",
+  search_term: "database connection failed",
+  field: "message"
+})
+```
+
+### Performance Analysis Example
+
+```typescript
+// 1. Analyze API response times by endpoint
+analyze_log_patterns({
+  file_path: "api-performance.jsonl",
+  group_by: "endpoint",
+  include_timeline: true
+})
+
+// 2. Find slow requests
+filter_logs({
+  file_path: "api-performance.jsonl",
+  custom_filter: { 
+    "response.duration": { "$gt": 5000 }  // >5 seconds
+  }
+})
+
+// 3. Correlate slow requests with system events
+find_related_logs({
+  file_path: "system-events.jsonl", 
+  correlation_id: "request-xyz789",
+  time_window_minutes: 5
+})
 ```
 
 ## License
