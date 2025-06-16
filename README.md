@@ -267,6 +267,164 @@ All tests use Jest with TypeScript and ES modules support. The test suite includ
 
 ## Usage Examples
 
+### AI Assistant Prompts and Use Cases
+
+Here are practical examples of how to interact with the MCP server through an AI assistant like Claude:
+
+#### **Initial Setup and Discovery**
+
+**Prompt**: *"I have some JSONL log files from a ClickUp migration. Can you help me set up the log analysis tool and understand what's in my logs?"*
+
+```
+AI Response using MCP tools:
+1. get_config() - Check current configuration
+2. list_log_files() - See what log files are available
+3. detect_schema({ file_path: "migration.jsonl", sample_size: 100 }) - Auto-detect the log structure
+4. set_config() - Apply the detected schema for optimal analysis
+```
+
+#### **Debugging Failed Migrations**
+
+**Prompt**: *"Migration 'migration-1750050885613' failed. Can you find all related logs and tell me what went wrong?"*
+
+```
+AI Response:
+1. find_related_logs({ correlation_id: "migration-1750050885613" }) - Find all related entries
+2. filter_logs({ level: "error", custom_filter: { migrationId: "migration-1750050885613" } }) - Focus on errors
+3. analyze_log_patterns({ group_by: "event" }) - See the sequence of events
+4. Provide analysis of failure points and recommendations
+```
+
+#### **Performance Investigation**
+
+**Prompt**: *"Our API calls seem slow today. Can you analyze the performance patterns and find bottlenecks?"*
+
+```
+AI Response:
+1. analyze_log_patterns({ group_by: "endpoint", include_timeline: true }) - See which endpoints are active
+2. filter_logs({ time_from: "2025-06-16T05:00:00Z" }) - Focus on recent logs
+3. search_logs({ search_term: "timeout" }) - Look for timeout errors
+4. find_related_logs() - Correlate slow requests with system events
+5. Present performance summary with specific recommendations
+```
+
+#### **Error Pattern Analysis**
+
+**Prompt**: *"We're getting intermittent 429 rate limit errors. Can you analyze when they occur and what triggers them?"*
+
+```
+AI Response:
+1. search_logs({ search_term: "429", field: "message" }) - Find rate limit errors
+2. analyze_log_patterns({ group_by: "response.status", include_timeline: true }) - Pattern analysis
+3. find_related_logs() - See what requests preceded the rate limits
+4. Generate timeline showing rate limit patterns and suggestions for rate limiting strategy
+```
+
+#### **Data Migration Audit**
+
+**Prompt**: *"I need to audit our data migration. Show me which tasks failed, which succeeded, and any data inconsistencies."*
+
+```
+AI Response:
+1. analyze_log_patterns({ group_by: "event" }) - Overview of migration events
+2. filter_logs({ event: "task_migration_complete" }) - Find completed tasks
+3. filter_logs({ level: "error", event: "task_migration_failed" }) - Find failed tasks
+4. search_logs({ search_term: "data_inconsistency" }) - Look for data issues
+5. Provide comprehensive migration report with success/failure statistics
+```
+
+#### **Security Investigation**
+
+**Prompt**: *"I suspect there might be some suspicious activity in our logs. Can you look for authentication failures, unusual access patterns, or potential security issues?"*
+
+```
+AI Response:
+1. search_logs({ search_term: "authentication failed" }) - Find auth failures
+2. search_logs({ search_term: "unauthorized" }) - Look for access denials
+3. filter_logs({ level: "error", time_from: "2025-06-16T00:00:00Z" }) - Recent errors
+4. analyze_log_patterns({ group_by: "userId", include_timeline: true }) - User activity patterns
+5. Present security summary with suspicious patterns and recommendations
+```
+
+#### **System Health Monitoring**
+
+**Prompt**: *"Give me a health check of our system. What's the error rate, what are the most common issues, and are there any trends I should be worried about?"*
+
+```
+AI Response:
+1. analyze_log_patterns({ group_by: "level", include_timeline: true }) - Error rate overview
+2. analyze_log_patterns({ group_by: "event" }) - Most common events
+3. filter_logs({ level: "error", time_from: "last 24 hours" }) - Recent errors
+4. search_logs({ search_term: "exception" }) - Find exceptions
+5. Generate system health dashboard with trends and alerts
+```
+
+#### **User Experience Analysis**
+
+**Prompt**: *"Our users are complaining about slow responses. Can you analyze user sessions and find where the bottlenecks are?"*
+
+```
+AI Response:
+1. search_logs({ search_term: "slow" }) - Find slow response mentions
+2. filter_logs({ custom_filter: { "response.duration": ">5000" } }) - Find slow requests
+3. find_related_logs({ correlation_id: "session-id" }) - Trace user sessions
+4. analyze_log_patterns({ group_by: "endpoint" }) - See which endpoints are slow
+5. Provide UX analysis with specific performance recommendations
+```
+
+#### **API Integration Debugging**
+
+**Prompt**: *"Our integration with ClickUp API is failing intermittently. Can you help me understand what's happening and when it fails?"*
+
+```
+AI Response:
+1. filter_logs({ custom_filter: { client: "ClickUp" } }) - Focus on ClickUp API calls
+2. search_logs({ search_term: "ClickUp", field: "message" }) - Find ClickUp-related logs
+3. analyze_log_patterns({ group_by: "response.status" }) - See response patterns
+4. find_related_logs({ time_window_minutes: 5 }) - Find correlating events
+5. Present API integration analysis with failure patterns and retry recommendations
+```
+
+#### **Data Quality Verification**
+
+**Prompt**: *"I need to verify the quality of our migrated data. Can you check for missing fields, invalid formats, or data corruption issues?"*
+
+```
+AI Response:
+1. search_logs({ search_term: "validation_error" }) - Find validation issues
+2. search_logs({ search_term: "missing_field" }) - Look for missing data
+3. filter_logs({ event: "data_validation" }) - Focus on validation events
+4. analyze_log_patterns({ group_by: "validation_status" }) - See validation results
+5. Generate data quality report with specific issues and fix recommendations
+```
+
+#### **Custom Business Logic Investigation**
+
+**Prompt**: *"We have custom business rules for task assignments. Can you analyze how often these rules are triggered and if they're working correctly?"*
+
+```
+AI Response:
+1. search_logs({ search_term: "business_rule", field: "event" }) - Find rule executions
+2. filter_logs({ event: "task_assignment" }) - Focus on assignments
+3. analyze_log_patterns({ group_by: "rule_type" }) - See which rules fire most
+4. find_related_logs({ correlation_id: "task-id" }) - Trace rule execution chains
+5. Present business rule analysis with effectiveness metrics
+```
+
+### Quick Start Prompts
+
+For new users, here are simple prompts to get started:
+
+**"Set up log analysis for my project"** → Guides through configuration setup
+**"What's in my log files?"** → Discovers and analyzes log structure
+**"Find all errors from today"** → Quick error analysis
+**"Show me the most common events"** → Pattern overview
+**"Find logs related to [specific ID]"** → Correlation analysis
+**"What happened between 2pm and 3pm?"** → Time-based investigation
+**"Check system health"** → Overall health dashboard
+**"Find slow requests"** → Performance analysis
+**"Show me failed migrations"** → Failure investigation
+
 ### Basic Setup and Configuration
 
 ```typescript

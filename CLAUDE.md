@@ -198,3 +198,33 @@ find_related_logs({
 - **Use correlation fields** to track related events across logs
 - **Leverage time windows** when finding related logs
 - **Configure display options** for readable output formatting
+
+## Common User Prompts and Expected Workflows
+
+When users interact with this MCP server through Claude, expect these common scenarios:
+
+### Investigation Prompts
+- *"Find all errors related to migration X"* → Use `find_related_logs()` + `filter_logs()`
+- *"What happened around 3pm yesterday?"* → Use `filter_logs()` with time range
+- *"Show me performance issues"* → Use `search_logs()` for "slow"/"timeout" + `analyze_log_patterns()`
+- *"Check system health"* → Use `analyze_log_patterns()` by level + timeline
+- *"Find failed API calls"* → Use `filter_logs()` with error level + API response analysis
+
+### Setup Prompts  
+- *"Help me set up log analysis"* → Guide through `get_config()` → `detect_schema()` → `set_config()`
+- *"What log files do I have?"* → Use `list_log_files()`
+- *"Analyze my log structure"* → Use `detect_schema()` + explain findings
+- *"Configure for ClickUp logs"* → Apply standard ClickUp schema configuration
+
+### Analysis Prompts
+- *"Generate a report"* → Combine multiple tools for comprehensive analysis
+- *"Find patterns"* → Use `analyze_log_patterns()` with different groupings
+- *"Trace a user session"* → Use `find_related_logs()` with session/user ID
+- *"Debug this issue"* → Systematic approach: patterns → errors → correlation → timeline
+
+### Best Response Patterns
+1. **Always start with context**: Use `get_config()` to understand current setup
+2. **Suggest schema detection**: If no custom schema detected, recommend `detect_schema()`
+3. **Provide actionable insights**: Don't just show data, explain what it means
+4. **Use correlation effectively**: Connect related events across time and IDs
+5. **Suggest next steps**: After analysis, recommend specific follow-up actions
