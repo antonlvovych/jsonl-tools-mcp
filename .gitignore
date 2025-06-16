@@ -10,6 +10,9 @@ dist/
 .env.local
 .jsonl-tools-config.json
 
+# Test coverage
+coverage/
+
 # IDE
 .vscode/
 .idea/

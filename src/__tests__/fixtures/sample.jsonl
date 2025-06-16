@@ -1,0 +1,5 @@
+{"event": "workspace_discovery_start", "level": "info", "message": "Starting workspace discovery phase", "migrationId": "migration-1750050885613", "timestamp": "2025-06-16T05:14:45.623Z"}
+{"event": "api_request", "level": "debug", "message": "Making request to ClickUp API", "migrationId": "migration-1750050885613", "taskId": "901502943040", "timestamp": "2025-06-16T05:14:46.123Z", "response": {"status": 200, "data": {"id": "901502943040", "name": "Test Task"}}}
+{"event": "api_error", "level": "error", "message": "Failed to fetch task details", "migrationId": "migration-1750050885613", "taskId": "901502943041", "timestamp": "2025-06-16T05:14:47.456Z", "error": "Rate limit exceeded", "errorMessage": "API rate limit reached"}
+{"event": "task_processing", "level": "info", "message": "Processing task successfully", "migrationId": "migration-1750050885613", "taskId": "901502943040", "listId": "list-456", "timestamp": "2025-06-16T05:14:48.789Z"}
+{"event": "migration_complete", "level": "info", "message": "Migration phase completed", "migrationId": "migration-1750050885613", "timestamp": "2025-06-16T05:14:50.123Z"}
